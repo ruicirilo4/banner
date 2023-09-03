@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exemplo de Exibição do "Now Playing"</title>
+</head>
+<body>
+  <h1>Now Playing</h1>
+  <div id="now-playing"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const nowPlayingElement = document.getElementById('now-playing');
+
+    // Function to extract text content using XPath
+    function extractTextUsingXPath(xpathExpression) {
+      const result = document.evaluate(xpathExpression, document, null, XPathResult.ANY_TYPE, null);
+      const node = result.iterateNext();
+      if (node) {
+        return node.textContent.trim();
+      }
+      return '';
+    }
+
+    // Make an Axios GET request to the external URL
+    axios.get('https://api.allorigins.win/raw?url=https://indie88.com/wp-content/themes/indie88/inc/streamon.php')
+      .then((response) => {
+        if (response.status === 200) {
+          const html = response.data;
+
+          // Extract information using XPath
+          const artistText = extractTextUsingXPath('/html/body/div[14]/div/comment()[1]');
+          const trackText = extractTextUsingXPath('/html/body/div[14]/div/comment()[2]');
+
+          console.log('Artista:', artistText);
+          console.log('Música:', trackText);
+
+          // Display the information on the webpage
+          nowPlayingElement.innerHTML = `<p>Artista: ${artistText}</p><p>Música: ${trackText}</p>`;
+        } else {
+          console.error(`Status de resposta inesperado: ${response.status}`);
+        }
+      })
+      .catch((error) => {
+        console.error(`Erro ao fazer a solicitação: ${error}`);
+        nowPlayingElement.innerHTML = '<p>Erro ao buscar informações "Now Playing"</p>';
+      });
+  </script>
+</body>
+</html>
